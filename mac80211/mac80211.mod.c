@@ -315,4 +315,4 @@ __attribute__((section(".modinfo"))) =
 "depends=cfg80211";
 
 
-MODULE_INFO(srcversion, "4DD07AC828AADF908A8F13B");
+MODULE_INFO(srcversion, "EC2393AC52FE44AA77BDD88");

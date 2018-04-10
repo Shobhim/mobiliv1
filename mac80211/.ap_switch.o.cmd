@@ -1026,14 +1026,82 @@ deps_/home/shobhi/mobiliv1/mac80211/ap_switch.o := \
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  /home/shobhi/mobiliv1/mac80211/ieee80211_i.h \
-    $(wildcard include/config/mac80211/debug/counters.h) \
-    $(wildcard include/config/mac80211/noinline.h) \
+  include/linux/tcp.h \
+    $(wildcard include/config/tcp/md5sig.h) \
+  include/net/sock.h \
+    $(wildcard include/config/net.h) \
+  include/linux/uaccess.h \
+  include/linux/memcontrol.h \
+    $(wildcard include/config/memcg/swap.h) \
+    $(wildcard include/config/inet.h) \
+  include/linux/res_counter.h \
+  include/linux/aio.h \
+  include/linux/filter.h \
+    $(wildcard include/config/bpf/jit.h) \
+  include/uapi/linux/filter.h \
+  include/linux/rculist_nulls.h \
+  include/linux/poll.h \
+  include/uapi/linux/poll.h \
+  /home/shobhi/mptcp/arch/x86/include/uapi/asm/poll.h \
+  /home/shobhi/mptcp/include/uapi/asm-generic/poll.h \
+  include/net/dst.h \
+  include/linux/rtnetlink.h \
+  include/uapi/linux/rtnetlink.h \
+  /home/shobhi/mptcp/include/uapi/linux/if_addr.h \
+  include/net/neighbour.h \
+  include/net/rtnetlink.h \
+  include/net/netlink.h \
+  include/net/inet_connection_sock.h \
+  include/net/inet_sock.h \
+  include/linux/jhash.h \
+  include/linux/unaligned/packed_struct.h \
+  include/net/request_sock.h \
+  include/net/netns/hash.h \
+  include/net/inet_timewait_sock.h \
+  include/net/tcp_states.h \
+  include/net/timewait_sock.h \
+  include/uapi/linux/tcp.h \
+  include/net/tcp.h \
+    $(wildcard include/config/syn/cookies.h) \
+  include/linux/crypto.h \
+  include/linux/cryptohash.h \
+  include/net/inet_hashtables.h \
   include/linux/interrupt.h \
     $(wildcard include/config/irq/forced/threading.h) \
     $(wildcard include/config/generic/irq/probe.h) \
-  include/linux/etherdevice.h \
+  include/linux/ip.h \
+  include/uapi/linux/ip.h \
+  include/linux/ipv6.h \
+    $(wildcard include/config/ipv6/router/pref.h) \
+    $(wildcard include/config/ipv6/route/info.h) \
+    $(wildcard include/config/ipv6/optimistic/dad.h) \
+    $(wildcard include/config/ipv6/mip6.h) \
+    $(wildcard include/config/ipv6/subtrees.h) \
+  include/uapi/linux/ipv6.h \
+  include/linux/icmpv6.h \
+  include/uapi/linux/icmpv6.h \
+  include/linux/udp.h \
+  include/uapi/linux/udp.h \
+  include/net/route.h \
+  include/net/inetpeer.h \
+  include/net/ipv6.h \
     $(wildcard include/config/have/efficient/unaligned/access.h) \
+  include/net/if_inet6.h \
+  include/net/ndisc.h \
+  include/linux/if_arp.h \
+    $(wildcard include/config/firewire/net.h) \
+  include/uapi/linux/if_arp.h \
+  include/linux/hash.h \
+  /home/shobhi/mptcp/arch/x86/include/asm/hash.h \
+  /home/shobhi/mptcp/include/uapi/linux/in_route.h \
+  /home/shobhi/mptcp/include/uapi/linux/route.h \
+  include/net/ip.h \
+  include/net/inet_ecn.h \
+  include/net/dsfield.h \
+  /home/shobhi/mobiliv1/mac80211/ieee80211_i.h \
+    $(wildcard include/config/mac80211/debug/counters.h) \
+    $(wildcard include/config/mac80211/noinline.h) \
+  include/linux/etherdevice.h \
   include/linux/leds.h \
     $(wildcard include/config/leds/triggers.h) \
     $(wildcard include/config/leds/trigger/ide/disk.h) \
@@ -1041,8 +1109,6 @@ deps_/home/shobhi/mobiliv1/mac80211/ap_switch.o := \
     $(wildcard include/config/leds/trigger/cpu.h) \
   include/net/ieee80211_radiotap.h \
   /home/shobhi/mobiliv1/mac80211/key.h \
-  include/linux/crypto.h \
-  include/linux/uaccess.h \
   /home/shobhi/mobiliv1/mac80211/sta_info.h \
   include/linux/average.h \
   /home/shobhi/mobiliv1/mac80211/debug.h \

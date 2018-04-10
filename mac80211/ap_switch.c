@@ -8,6 +8,8 @@
 #include <linux/types.h>
 #include <linux/string.h>
 #include <linux/sysctl.h>
+#include <linux/tcp.h>
+#include <net/tcp.h>
 
 #include "ieee80211_i.h"
 #include "driver-ops.h"
