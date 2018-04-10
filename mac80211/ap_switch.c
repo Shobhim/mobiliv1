@@ -39,6 +39,8 @@ unsigned int num_channels;
  * switching is required
  */
 unsigned int num_vifs;
+int avg_tput = 0;
+int tput_thresh = 20;
 
 /* [VD]: completely enable or disable apsw */
 int sysctl_timer_enabled = 1;
@@ -198,6 +200,8 @@ EXPORT_SYMBOL(g_switch_wait_timer);
 /* flag that enables or disables forced switching */
 bool g_rxtx_timer_allowed;
 EXPORT_SYMBOL(g_rxtx_timer_allowed);
+struct timer_list g_probe_timer;
+int g_probe_timer_enabled = 0;
 struct timespec g_last_packet_time;
 EXPORT_SYMBOL(g_last_packet_time);
 int g_delta_t;
@@ -227,6 +231,7 @@ int g_apsw_timer_enabled = 1;
 /* Channel information used for switching */
 /* TODO: duplicate channel info will occur in the case of same-channel association */
 struct cfg80211_chan_def g_channel_info[MAX_VIFS];
+struct ieee80211_sub_if_data *vif_sdata[MAX_VIFS];
 unsigned int g_current_channel_index = 0;
 unsigned int g_next_channel_index = 0;
 
@@ -390,6 +395,7 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
     setup_timer(&g_timer, timer_function, 0);
     setup_timer(&g_rxtx_timer, rxtx_timer_function, 0);
     setup_timer(&g_switch_wait_timer, wait_timer_function, 0);
+    // setup_timer(&g_probe_timer, probe_timer_function, 0);
     INIT_WORK(&g_apsw.ap_switch_work, ap_switch_work_handler);
     g_switch_waiting = false;
     g_natural_sw = false;
@@ -410,6 +416,13 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
     mod_timer(&g_timer, jiffies+sysctl_time_slot);
 
     ap_switch_populate_mcs_table();
+
+    struct ieee80211_sub_if_data *l_sdata;
+    struct ieee80211_local *local = hw_to_local(g_hw);
+
+    list_for_each_entry(l_sdata, &local->interfaces, list) {
+        printk(KERN_INFO "[WIFI MOBILITY] %s", l_sdata->name);
+    }
 
     ap_switch_sysctl_hdr = register_net_sysctl(&init_net, "net/apsw",
                                         ap_switch_table);
