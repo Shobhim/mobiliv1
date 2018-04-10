@@ -1,0 +1,1 @@
+cmd_/home/shobhi/mobiliv1/wireless/lib80211_crypt_ccmp.ko := ld -r -m elf_x86_64 -T /home/shobhi/mptcp/scripts/module-common.lds --build-id  -o /home/shobhi/mobiliv1/wireless/lib80211_crypt_ccmp.ko /home/shobhi/mobiliv1/wireless/lib80211_crypt_ccmp.o /home/shobhi/mobiliv1/wireless/lib80211_crypt_ccmp.mod.o
