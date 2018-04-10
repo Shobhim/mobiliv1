@@ -1,2 +1,13 @@
 *.o
-*.mod.o
+*.o.cmd
+*.ko.cmd
+*.mod
+Module.symvers
+*.pcap
+*.ko
+*.mod.*
+mptcp_pyshark.py~
+mptcp_live.py~
+TCP-FLT
+added_vifs
+modules.order
