@@ -1,5 +1,0 @@
-kernel//home/shobhi/mobiliv1/wireless/cfg80211.ko
-kernel//home/shobhi/mobiliv1/wireless/lib80211.ko
-kernel//home/shobhi/mobiliv1/wireless/lib80211_crypt_wep.ko
-kernel//home/shobhi/mobiliv1/wireless/lib80211_crypt_ccmp.ko
-kernel//home/shobhi/mobiliv1/wireless/lib80211_crypt_tkip.ko
