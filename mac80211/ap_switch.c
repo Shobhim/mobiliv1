@@ -428,7 +428,7 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
                                         ap_switch_table);
 
     if (!ap_switch_sysctl_hdr) {
-	return;
+		return;
     }
 	/* [VD]: Initially, switching is disabled. It needs to be
 	 * activated via sysctl.
@@ -453,9 +453,9 @@ void ap_switch_stop_interface(struct ieee80211_hw *hw_info)
     kfree(g_time_slots);
 
     if (g_apsw_timer_enabled == 1) {
-    del_timer(&g_timer);
-    del_timer(&g_rxtx_timer);
-    del_timer(&g_switch_wait_timer);
+	    del_timer(&g_timer);
+	    del_timer(&g_rxtx_timer);
+	    del_timer(&g_switch_wait_timer);
     }
 
     /* [VD]: stop all queues */
@@ -491,31 +491,33 @@ void ap_switch_change_channel(struct ieee80211_sub_if_data *sdata,
         return;
     }
 
+    //Iterate through the complete list to find the current channel that we are on.
     list_for_each_entry(l_sdata, &local->interfaces, list) {
         if (l_sdata == sdata) {
             found = true;
             break;
         }
     }
+    //If the current channel is not found, then return.
     if (found == false)
         return;
 
     mutex_lock(&local->iflist_mtx);
-    if (stop == 0) {
+    if (stop == 0) { //if stop is 0 then stop all the channels with freq == current_channel
         list_for_each_entry(l_sdata, &local->interfaces, list) {
             if (!ieee80211_sdata_running(l_sdata))
                 continue;
 
-	    if (l_sdata->vif.type == NL80211_IFTYPE_STATION &&
-		l_sdata->u.mgd.associated && 
-		l_sdata->apsw_center_freq == current_channel) {
-	      set_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state);
-	      ieee80211_offchannel_ps_enable(l_sdata);
-	      netif_tx_stop_all_queues(l_sdata->dev);
-	      /* ieee80211_stop_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP, IEEE80211_QUEUE_STOP_REASON_FLUSH); */
-	      /* ieee80211_flush_queues(local, l_sdata); */
-	      drv_flush(local, 0, false);
-	    }
+		    if (l_sdata->vif.type == NL80211_IFTYPE_STATION &&
+			  l_sdata->u.mgd.associated && 
+			  l_sdata->apsw_center_freq == current_channel) {
+				set_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state);
+				ieee80211_offchannel_ps_enable(l_sdata);
+				netif_tx_stop_all_queues(l_sdata->dev);
+				/* ieee80211_stop_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP, IEEE80211_QUEUE_STOP_REASON_FLUSH); */
+				/* ieee80211_flush_queues(local, l_sdata); */
+				drv_flush(local, 0, false);
+		    }
         }
     }
     else {
@@ -526,16 +528,16 @@ void ap_switch_change_channel(struct ieee80211_sub_if_data *sdata,
             if (l_sdata->vif.type == NL80211_IFTYPE_MONITOR)
                 continue;
 
-            if (l_sdata->vif.type == NL80211_IFTYPE_STATION &&
-                        l_sdata->u.mgd.associated &&
-                        l_sdata->apsw_center_freq == next_channel &&
-                        test_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state)) {
-                clear_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state);
+            if (l_sdata->vif.type == NL80211_IFTYPE_STATION && //if type is station and it is associated 
+              l_sdata->u.mgd.associated && //and its center frequency == next_channel
+              l_sdata->apsw_center_freq == next_channel && // and it is offchannel
+              test_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state)) {
+            	clear_bit(SDATA_STATE_OFFCHANNEL, &l_sdata->state);
                 ieee80211_offchannel_ps_disable(l_sdata);
                 drv_flush(local, 0, false);
-		/* ieee80211_flush_queues(local, l_sdata); */
+				/* ieee80211_flush_queues(local, l_sdata); */
                 netif_tx_wake_all_queues(l_sdata->dev);
-           }
+            }
         }
     }
     mutex_unlock(&local->iflist_mtx);
@@ -549,117 +551,118 @@ void ap_switch_change_channel(struct ieee80211_sub_if_data *sdata,
 
 void ap_switch_vif_sleep(struct ieee80211_sub_if_data *sdata)
 {
-  struct ieee80211_local *local = hw_to_local(g_hw);
-  unsigned int vindex = 0;
+	struct ieee80211_local *local = hw_to_local(g_hw);
+	unsigned int vindex = 0;
 
-  if (WARN_ON(local->use_chanctx))
-    return;
+  	if (WARN_ON(local->use_chanctx))
+    	return;
 
-  /*
-   * notify the AP about us leaving the channel and stop all
-   * STA interfaces.
-   */
+	/*
+	* notify the AP about us leaving the channel and stop all
+	* STA interfaces.
+	*/
 
-  /*
-   * Stop queues and transmit all frames queued by the driver
-   * before sending nullfunc to enable powersave at the AP.
-   */
-  ieee80211_stop_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP,
+	/*
+	* Stop queues and transmit all frames queued by the driver
+	* before sending nullfunc to enable powersave at the AP.
+	*/
+  	ieee80211_stop_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP,
 					IEEE80211_QUEUE_STOP_REASON_OFFCHANNEL);
-  ieee80211_flush_queues(local, NULL);
+  	ieee80211_flush_queues(local, NULL);
 
-  mutex_lock(&local->iflist_mtx);
-  list_for_each_entry(sdata, &local->interfaces, list) {
-    if (!ieee80211_sdata_running(sdata))
-      continue;
+	mutex_lock(&local->iflist_mtx);
+	list_for_each_entry(sdata, &local->interfaces, list) {
+	    if (!ieee80211_sdata_running(sdata))
+	    	continue;
 
-    if (sdata->vif.type == NL80211_IFTYPE_P2P_DEVICE)
-      continue;
+	    if (sdata->vif.type == NL80211_IFTYPE_P2P_DEVICE)
+	    	continue;
 
-    if (sdata->vif.type != NL80211_IFTYPE_MONITOR)
-      set_bit(SDATA_STATE_OFFCHANNEL, &sdata->state);
+	    if (sdata->vif.type != NL80211_IFTYPE_MONITOR)
+	    	set_bit(SDATA_STATE_OFFCHANNEL, &sdata->state);
 
-    if (sdata->vif.type == NL80211_IFTYPE_STATION &&
-	sdata->u.mgd.associated &&
-	channels[vindex] == g_current_channel)
-      ieee80211_offchannel_ps_enable(sdata);
-    vindex++;
-  }
-  mutex_unlock(&local->iflist_mtx);
+	    if (sdata->vif.type == NL80211_IFTYPE_STATION &&
+		  sdata->u.mgd.associated &&
+		  channels[vindex] == g_current_channel)
+	    	ieee80211_offchannel_ps_enable(sdata); // send nullfunc to enable 
+	    //powersave for on the channels that have center freq == current_channel.
+	    vindex++;
+  	}
+  	mutex_unlock(&local->iflist_mtx);
 }
 
 void ap_switch_vif_wake(struct ieee80211_sub_if_data *sdata)
 {
-  struct ieee80211_local *local = hw_to_local(g_hw);
-  unsigned int vindex = 0;
+	struct ieee80211_local *local = hw_to_local(g_hw);
+	unsigned int vindex = 0;
 
-  if (WARN_ON(local->use_chanctx))
-    return;
+	if (WARN_ON(local->use_chanctx))
+    	return;
 
-  mutex_lock(&local->iflist_mtx);
-  list_for_each_entry(sdata, &local->interfaces, list) {
-    if (sdata->vif.type == NL80211_IFTYPE_P2P_DEVICE)
-      continue;
+	mutex_lock(&local->iflist_mtx);
+	list_for_each_entry(sdata, &local->interfaces, list) {
+    	if (sdata->vif.type == NL80211_IFTYPE_P2P_DEVICE)
+    		continue;
 
-    if (sdata->vif.type != NL80211_IFTYPE_MONITOR)
-      clear_bit(SDATA_STATE_OFFCHANNEL, &sdata->state);
+    	if (sdata->vif.type != NL80211_IFTYPE_MONITOR)
+    		clear_bit(SDATA_STATE_OFFCHANNEL, &sdata->state);
 
-    if (!ieee80211_sdata_running(sdata))
-      continue;
+    	if (!ieee80211_sdata_running(sdata))
+    		continue;
 
-    /* Tell AP we're back */
-    if (sdata->vif.type == NL80211_IFTYPE_STATION &&
-	sdata->u.mgd.associated &&
-	channels[vindex] == g_next_channel)
-      ieee80211_offchannel_ps_disable(sdata);
-    vindex++;
-  }
-  mutex_unlock(&local->iflist_mtx);
+    	/* Tell AP we're back */
+    	if (sdata->vif.type == NL80211_IFTYPE_STATION &&
+		  sdata->u.mgd.associated &&
+		  channels[vindex] == g_next_channel)
+       		ieee80211_offchannel_ps_disable(sdata);
+    	vindex++;
+  	}
+  	mutex_unlock(&local->iflist_mtx);
 
-  ieee80211_wake_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP,
+  	ieee80211_wake_queues_by_reason(&local->hw, IEEE80211_MAX_QUEUE_MAP,
 				  IEEE80211_QUEUE_STOP_REASON_OFFCHANNEL);
 }
 
 void sort(unsigned int array[], unsigned int len)
 {
-  unsigned int i = 0;
-  unsigned int j = 0;
-  unsigned int aux = 0;
+	unsigned int i = 0;
+  	unsigned int j = 0;
+  	unsigned int aux = 0;
 
-  for (i = 0; i < len - 1; i++)
-    for (j = i + 1; j < len; j++)
-      if (array[i] > array[j])
-	{
-	  aux = array[j];
-	  array[j] = array[i];
-	  array[i] = aux;
-	}
+  	for (i = 0; i < len - 1; i++)
+    	for (j = i + 1; j < len; j++)
+     	 	if (array[i] > array[j])
+			{
+			  	aux = array[j];
+			  	array[j] = array[i];
+			  	array[i] = aux;
+			}
 }
 
 /* Count number of unique non-zero channels */
 unsigned int count_unique(unsigned int array[], unsigned int len)
 {
-  unsigned int i = 0;
-  unsigned int num = 0;
-  unsigned int new_array[len];
+	unsigned int i = 0;
+	unsigned int num = 0;
+	unsigned int new_array[len];
 
-  /* copy into new array */
-  for (i = 0; i < len; i++)
-    new_array[i] = array[i];
+	/* copy into new array */
+	for (i = 0; i < len; i++)
+		new_array[i] = array[i];
 
-  /* sort, leave array unmodified */
-  sort(new_array, len);
+	/* sort, leave array unmodified */
+	sort(new_array, len);
 
-  /* count nonzero uniques */
-  for (i = 0; i < len; i++)
+	/* count nonzero uniques */
+	for (i = 0; i < len; i++)
     {
-      if (new_array[i] == new_array[i+1])
-	continue;
-      else if (new_array[i] != 0)
-	num++;
+      	if (new_array[i] == new_array[i+1])
+			continue;
+      	else if (new_array[i] != 0)
+			num++;
     }
 
-  return num;
+  	return num;
 }
 
 /*
@@ -681,9 +684,9 @@ void ap_switch_work_handler(struct work_struct *work)
 
     if (sysctl_timer_enabled == 0) {
         g_apsw_timer_enabled = 0;
-	del_timer(&g_timer);
-	del_timer(&g_rxtx_timer);
-	del_timer(&g_switch_wait_timer);
+		del_timer(&g_timer);
+		del_timer(&g_rxtx_timer);
+		del_timer(&g_switch_wait_timer);
         return;
     }
 
@@ -694,26 +697,36 @@ void ap_switch_work_handler(struct work_struct *work)
      * update the cfg80211_chan_def structures at the same time;
      */
 
-    list_for_each_entry(sdata, &local->interfaces, list) {
-      if (sdata->vif.type == NL80211_IFTYPE_STATION && sdata->u.mgd.associated && channels[vif_index] == 0) {
-	/* 
-	 * Get the channel; see if it's already in the list. If not,
-	 * add it to the list and increment num_channels. Also, turn on switching
-	 * if num_channels > 2
-	 */
-	if (first_channel_index == -1)
-	  first_channel_index = vif_index;
-	channels[vif_index] = sdata->local->_oper_chandef.center_freq1;
-    	sdata->apsw_center_freq = channels[vif_index];
+    // Goes over every virtual interface to check if it is associated or not. If its associated and its info is not saved 
+    // then it will save its info in the "g_channel_info" array and the "channels" array has the info about the center 
+    // frequency on which a particular inteface is associated
 
-	/* Save channel info */
-	g_channel_info[vif_index] = sdata->local->_oper_chandef;
-      }
-      else if (sdata->vif.type == NL80211_IFTYPE_STATION && !sdata->u.mgd.associated && channels[vif_index] != 0) {
-	  channels[vif_index] = 0;
-	  sdata->apsw_center_freq = 0;
-      }
-      vif_index++;
+    list_for_each_entry(sdata, &local->interfaces, list) {
+    	if (sdata->vif.type == NL80211_IFTYPE_STATION && sdata->u.mgd.associated && channels[vif_index] == 0) {
+		/* 
+		 * Get the channel; see if it's already in the list. If not,
+		 * add it to the list and increment num_channels. Also, turn on switching
+		 * if num_channels > 2
+		 */
+			if (first_channel_index == -1)
+	  			first_channel_index = vif_index;
+			sdata->if_active = true;
+			sdata->probe_count = 0;
+			sdata->if_tput = 0;
+			channels[vif_index] = sdata->local->_oper_chandef.center_freq1;
+			sdata->apsw_center_freq = channels[vif_index];
+
+			/* Save channel info */
+			g_channel_info[vif_index] = sdata->local->_oper_chandef;
+
+			/* Save the vif sdata*/
+			vif_sdata[vif_index] = sdata;
+      	}
+		else if (sdata->vif.type == NL80211_IFTYPE_STATION && !sdata->u.mgd.associated && channels[vif_index] != 0) {
+			channels[vif_index] = 0;
+			sdata->apsw_center_freq = 0;
+  		}
+      	vif_index++;
     }
 
     num_channels = count_unique(channels, MAX_CHANNELS);
@@ -721,31 +734,36 @@ void ap_switch_work_handler(struct work_struct *work)
     g_current_channel = local->_oper_chandef.center_freq1;
 
     if (num_channels == 1 || num_channels == 0) {
-      g_ap_switching = false;
-      sysctl_ap_switching = 0;
+		g_ap_switching = false;
+		sysctl_ap_switching = 0;
 
-      mod_timer(&g_timer, jiffies+sysctl_time_slot*g_time_slot_multiplier);
-      return;
+		mod_timer(&g_timer, jiffies+sysctl_time_slot*g_time_slot_multiplier);
+		return;
     }
 
     if (num_channels > 1 && g_ap_switching == false) {
-      g_ap_switching = true;
-      sysctl_ap_switching = 1;
+		g_ap_switching = true;
+		sysctl_ap_switching = 1;
     }
+
+    // Check to see if the ith index in the channels array is the current channel and that 
+    // current channel is set. next set j as i + 1 and see if the jth entry in the channels 
+    // array is non-zero. if it is not, then increment j until you find a non-zero entry. set 
+    // the next_channel variable as channel[j].
 
     if (!g_switch_waiting) {
         g_next_channel = 0;
         for (i = first_channel_index; i < MAX_CHANNELS; i++) {
             if (g_current_channel == channels[i] && g_current_channel != 0) {
-	      /* g_next_channel = channels[(i+1)%num_channels]; */
-	      /* Get next channel */
-	      j = (i + 1) % MAX_CHANNELS;
-	      while (channels[j] == 0)
-	      	j = (j + 1) % MAX_CHANNELS;
-	      g_next_channel = channels[j];
-	      g_next_channel_index = j;
-	      g_current_channel_index = i;
-	      break;
+				/* g_next_channel = channels[(i+1)%num_channels]; */
+				/* Get next channel */
+				j = (i + 1) % MAX_CHANNELS;
+				while (channels[j] == 0)
+					j = (j + 1) % MAX_CHANNELS;
+				g_next_channel = channels[j];
+				g_next_channel_index = j;
+				g_current_channel_index = i;
+				break;
             }
         }
 
@@ -758,9 +776,9 @@ void ap_switch_work_handler(struct work_struct *work)
 
         /* stop vifs on any channel other than next channel */
         /* ap_switch_change_channel(sdata, g_next_channel, g_current_channel, 0); */
-	ap_switch_vif_sleep(sdata);
+		ap_switch_vif_sleep(sdata);
 
-	/* Start wait timer after enabling PS */
+		/* Start wait timer after enabling PS */
         if (g_natural_sw && sysctl_switch_wait_time > 0) {
             g_switch_waiting = true;
             mod_timer(&g_switch_wait_timer, jiffies+sysctl_switch_wait_time);
@@ -776,11 +794,11 @@ work_continue:
                 break;
             }
             /* ap_switch_change_channel(sdata, g_current_channel, g_next_channel, 0); */
-	    ap_switch_vif_sleep(sdata);
+	    	ap_switch_vif_sleep(sdata);
         }
 
-	/* set struct cfg80211_chan_def to next channel */
-	local->_oper_chandef = g_channel_info[g_next_channel_index];
+		/* set struct cfg80211_chan_def to next channel */
+		local->_oper_chandef = g_channel_info[g_next_channel_index];
 
         /* tell the driver to set the channel */
         hw_ret = ieee80211_hw_config(local, IEEE80211_CONF_CHANGE_CHANNEL);
@@ -788,10 +806,10 @@ work_continue:
 
         /* start all vifs on the next channel */
         /* ap_switch_change_channel(sdata, g_current_channel, g_next_channel, 1); */
-	ap_switch_vif_wake(sdata);
+		ap_switch_vif_wake(sdata);
 
-	/* g_current_channel = channels[g_next_channel_index]; */
-	/* g_next_channel = channels[g_current_channel_index]; */
+		/* g_current_channel = channels[g_next_channel_index]; */
+		/* g_next_channel = channels[g_current_channel_index]; */
 
         g_current_channel = g_next_channel;
         g_time_slot_multiplier = 1;

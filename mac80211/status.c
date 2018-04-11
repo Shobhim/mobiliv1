@@ -485,6 +485,11 @@ static void ieee80211_tx_latency_end_msrmnt(struct ieee80211_local *local,
 	struct ieee80211_tx_latency_stat *tx_lat;
 	struct ieee80211_tx_latency_bin_ranges *tx_latency;
 	ktime_t skb_arv = skb->tstamp;
+#ifdef WIFI_MOBILITY
+	struct ieee80211_sub_if_data *sdata = sta->sdata;
+	long m;
+	u32 srtt = sdata->if_tput;
+#endif
 
 	tx_latency = rcu_dereference(local->tx_latency);
 
@@ -510,6 +515,21 @@ static void ieee80211_tx_latency_end_msrmnt(struct ieee80211_local *local,
 	ktime_get_ts(&dprt_time); /* time stamp completion time */
 	skb_dprt = ktime_set(dprt_time.tv_sec, dprt_time.tv_nsec);
 	msrmnt = ktime_to_ms(ktime_sub(skb_dprt, skb_arv));
+
+#ifdef WIFI_MOBILITY
+	m = msrmnt;
+
+	if (srtt != 0) {
+		m -= (srtt >> 3);
+		srtt += m;
+	} else {
+		srtt = m << 3;
+	}
+
+	sdata->if_tput = max(1U, srtt);
+#endif
+
+
 
 	if (tx_lat->max < msrmnt) /* update stats */
 		tx_lat->max = msrmnt;
