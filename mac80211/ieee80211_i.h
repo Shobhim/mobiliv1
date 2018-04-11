@@ -732,7 +732,7 @@ struct ieee80211_sub_if_data {
         int max_ecn_mark_rate;
         u32 if_tput;
         int probe_count;
-        bool if_active;
+        int if_active;
 #endif
 
 	int drop_unencrypted;
@@ -1833,6 +1833,7 @@ void ap_switch_change_channel(struct ieee80211_sub_if_data *,
 void timer_function(unsigned long);
 void rxtx_timer_function(unsigned long);
 void wait_timer_function(unsigned long);
+void probe_timer_function(unsigned long);
 void ap_switch_work_handler(struct work_struct *);
 int ap_switch_timediff_ns(struct timespec, struct timespec);
 int ap_switch_decide_drop(struct ieee80211_sub_if_data *);

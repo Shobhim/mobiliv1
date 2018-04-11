@@ -395,7 +395,7 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
     setup_timer(&g_timer, timer_function, 0);
     setup_timer(&g_rxtx_timer, rxtx_timer_function, 0);
     setup_timer(&g_switch_wait_timer, wait_timer_function, 0);
-    // setup_timer(&g_probe_timer, probe_timer_function, 0);
+    setup_timer(&g_probe_timer, probe_timer_function, 0);
     INIT_WORK(&g_apsw.ap_switch_work, ap_switch_work_handler);
     g_switch_waiting = false;
     g_natural_sw = false;
@@ -710,7 +710,7 @@ void ap_switch_work_handler(struct work_struct *work)
 		 */
 			if (first_channel_index == -1)
 	  			first_channel_index = vif_index;
-			sdata->if_active = true;
+			sdata->if_active = 1;
 			sdata->probe_count = 0;
 			sdata->if_tput = 0;
 			channels[vif_index] = sdata->local->_oper_chandef.center_freq1;
@@ -732,6 +732,23 @@ void ap_switch_work_handler(struct work_struct *work)
     num_channels = count_unique(channels, MAX_CHANNELS);
     num_vifs = vif_index;
     g_current_channel = local->_oper_chandef.center_freq1;
+
+    // retrieves the information of the current interface.
+    list_for_each_entry(sdata, &local->interfaces, list) {
+        break;
+    }
+
+    // printk(KERN_INFO "[WIFI MOBILITY] %s %lu %d\n", sdata->name, (unsigned long)sdata->if_tput, sdata->if_active);
+    // printk(KERN_INFO "[WIFI MOBILITY] %d %d\n",vif_index, channels[vif_index]);
+
+
+    if (sdata->if_tput > 0 && sdata->if_tput < tput_thresh * avg_tput / 100) {
+    	sdata->if_active = 0;
+    	if(g_probe_timer_enabled == 0)
+    		mod_timer(&g_probe_timer, jiffies + sysctl_time_slot * 2 * MAX_VIFS);
+    }
+
+    avg_tput = sysctl_alpha * sdata->if_tput / 100 + (100 - sysctl_alpha) * avg_tput / 100;
 
     if (num_channels == 1 || num_channels == 0) {
 		g_ap_switching = false;
@@ -758,7 +775,7 @@ void ap_switch_work_handler(struct work_struct *work)
 				/* g_next_channel = channels[(i+1)%num_channels]; */
 				/* Get next channel */
 				j = (i + 1) % MAX_CHANNELS;
-				while (channels[j] == 0)
+				while (channels[j] == 0 || vif_sdata[j]->if_active == 0)
 					j = (j + 1) % MAX_CHANNELS;
 				g_next_channel = channels[j];
 				g_next_channel_index = j;
@@ -846,4 +863,24 @@ void rxtx_timer_function(unsigned long data)
 void wait_timer_function(unsigned long data)
 {
     ieee80211_queue_work(g_hw, &g_apsw.ap_switch_work);
+}
+
+void probe_timer_function(unsigned long data)
+{
+	struct ieee80211_sub_if_data *sdata;
+    struct ieee80211_local *local = hw_to_local(g_hw);
+
+    g_probe_timer_enabled = 0;
+    list_for_each_entry(sdata, &local->interfaces, list) {
+
+    	if(!sdata->if_active)
+    	{
+    		sdata->if_active = 1;
+        	sdata->probe_count++;
+    	}
+        
+    }
+
+    ieee80211_queue_work(g_hw, &g_apsw.ap_switch_work);
+
 }

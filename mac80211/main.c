@@ -1161,7 +1161,7 @@ static int __init ieee80211_init(void)
 	struct sk_buff *skb;
 	int ret;
 
-        printk(KERN_DEBUG "ma80211: multiwifi\n"); 
+        printk(KERN_DEBUG "mac80211: multiwifi\n"); 
 
 	BUILD_BUG_ON(sizeof(struct ieee80211_tx_info) > sizeof(skb->cb));
 	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, driver_data) +
