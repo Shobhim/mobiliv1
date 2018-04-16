@@ -421,7 +421,7 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
     struct ieee80211_local *local = hw_to_local(g_hw);
 
     list_for_each_entry(l_sdata, &local->interfaces, list) {
-        printk(KERN_INFO "[WIFI MOBILITY] %s", l_sdata->name);
+        printk("[WIFI MOBILITY] %s", l_sdata->name);
     }
 
     ap_switch_sysctl_hdr = register_net_sysctl(&init_net, "net/apsw",
