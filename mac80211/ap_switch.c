@@ -235,6 +235,9 @@ struct ieee80211_sub_if_data *vif_sdata[MAX_VIFS];
 unsigned int g_current_channel_index = 0;
 unsigned int g_next_channel_index = 0;
 
+//Count variable to print info
+int print_count = 0;
+
 static void ap_switch_populate_mcs_table(void)
 {
     g_mcs_table[0][0] = 65;
@@ -421,7 +424,7 @@ void ap_switch_load_interface(struct ieee80211_hw *hw_info)
     struct ieee80211_local *local = hw_to_local(g_hw);
 
     list_for_each_entry(l_sdata, &local->interfaces, list) {
-        printk("[WIFI MOBILITY] %s", l_sdata->name);
+        printk(KERN_INFO "[WIFI MOBILITY] %s", l_sdata->name);
     }
 
     ap_switch_sysctl_hdr = register_net_sysctl(&init_net, "net/apsw",
@@ -738,6 +741,12 @@ void ap_switch_work_handler(struct work_struct *work)
         break;
     }
 
+    if (print_count == 100){
+    	printk(KERN_INFO "[WIFI MOBILITY] %s %d %d\n", sdata->name, sdata->if_tput, sdata->if_active);
+    	print_count = 0;
+    } else {
+    	print_count++;
+    }
     // printk(KERN_INFO "[WIFI MOBILITY] %s %lu %d\n", sdata->name, (unsigned long)sdata->if_tput, sdata->if_active);
     // printk(KERN_INFO "[WIFI MOBILITY] %d %d\n",vif_index, channels[vif_index]);
 

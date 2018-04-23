@@ -517,6 +517,7 @@ static void ieee80211_tx_latency_end_msrmnt(struct ieee80211_local *local,
 	msrmnt = ktime_to_ms(ktime_sub(skb_dprt, skb_arv));
 
 #ifdef WIFI_MOBILITY
+	printk(KERN_INFO "[WIFI MOBILITY] msrmnt : %d", (int)msrmnt);
 	m = msrmnt;
 
 	if (srtt != 0) {

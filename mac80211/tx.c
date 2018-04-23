@@ -21,7 +21,7 @@
 #include <linux/export.h>
 #ifdef WIFI_MOBILITY
 #include <linux/ip.h>
-// #include <linux/tcp.h>
+#include <linux/tcp.h>
 // #include <net/tcp.h>
 #endif
 #include <linux/time.h>

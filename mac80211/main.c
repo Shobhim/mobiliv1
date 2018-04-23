@@ -24,6 +24,10 @@
 #include <net/net_namespace.h>
 #include <net/cfg80211.h>
 #include <net/addrconf.h>
+// #ifdef WIFI_MOBILITY
+// #include <linux/fs.h>
+// #include <linux/err.h>
+// #endif
 
 #include "ieee80211_i.h"
 #include "driver-ops.h"
@@ -33,6 +37,11 @@
 #include "led.h"
 #include "cfg.h"
 #include "debugfs.h"
+
+// #ifdef WIFI_MOBILITY
+// #define CSR_PROC_FNAME "csrsched"
+// #define CSR_STR_SIZE 256
+// #endif
 
 void ieee80211_configure_filter(struct ieee80211_local *local)
 {
@@ -1156,12 +1165,68 @@ void ieee80211_free_hw(struct ieee80211_hw *hw)
 }
 EXPORT_SYMBOL(ieee80211_free_hw);
 
+// #ifdef WIFI_MOBILITY
+// // Called when the user reads from the /sys/kernel/debug/CSR_PROC_FNAME file.
+// // Write data to the file.
+// static int csr_dbg_show(struct seq_file *a_pFile, void *a_pvData)
+// {
+// 	seq_printf(a_pFile, "Hello World.\n");
+// 	return(0);
+// } // end csr_dbg_show
+
+// // Called when the user writes to the /sys/kernel/debug/CSR_PROC_FNAME file.
+// // Reads the user command.
+// static ssize_t csr_dbg_write(struct file *a_pFile, const char __user *a_pucUserBuf,
+// 	size_t a_iBytesIn, loff_t *a_piOffset)
+// {
+// 	size_t iBytesProc;		// Bytes accepted and processed
+// 	char zRawCmd[CSR_STR_SIZE];		// User command in kernel space
+
+// 	iBytesProc = a_iBytesIn;
+
+// 	if(iBytesProc > CSR_STR_SIZE - 1)		// Reserve byte for NULL
+// 	{
+// 		iBytesProc = CSR_STR_SIZE - 1;
+// 	}
+
+// 	if(copy_from_user(&zRawCmd, a_pucUserBuf, iBytesProc) != 0)
+// 	{
+// 		return (-EFAULT);
+// 	}
+
+// 	zRawCmd[iBytesProc] = '\0';		// Make Sure NULL terminated
+// 	*a_piOffset += iBytesProc;		// Adjust file offset
+// 	return (iBytesProc);			// Return Bytes Accepted
+// } // end csr_dbg_write
+
+// static int csr_dbg_open(struct inode *a_pINode, struct file *a_pFile)
+// {
+// 	return (single_open(a_pFile, csr_dbg_show, NULL));
+// } // end csr_dbg_open
+
+// static int csr_dbg_close(struct inode *a_pINode, struct file *a_pFile)
+// {
+// 	return (single_release(a_pINode, a_pFile));
+// } // end csr_dbg_close
+
+// static const struct file_operations csr_dbg_fops = {
+// 	.open 		= csr_dbg_open,
+// 	.write 		= csr_dbg_write,
+// 	.read 		= seq_read,
+// 	.llseek 	= seq_lseek,
+// 	.release 	= csr_dbg_close
+// };
+// #endif
+
+
 static int __init ieee80211_init(void)
 {
 	struct sk_buff *skb;
 	int ret;
 
-    printk(KERN_INFO "mac80211: multiwifi\n"); 
+    printk(KERN_INFO "[WIFI MOBILITY] mac80211: multiwifi\n"); 
+
+    // debugfs_create_file(CSR_PROC_FNAME, 0644, NULL, NULL, &csr_dbg_fops);
 
 	BUILD_BUG_ON(sizeof(struct ieee80211_tx_info) > sizeof(skb->cb));
 	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, driver_data) +
@@ -1182,6 +1247,10 @@ static int __init ieee80211_init(void)
 	ret = ieee80211_iface_init();
 	if (ret)
 		goto err_netdev;
+
+// #ifdef WIFI_MOBILITY
+//     debugfs_create_file(CSR_PROC_FNAME, 0644, NULL, NULL, &csr_dbg_fops);
+// #endif
 
 	return 0;
  err_netdev:
@@ -1207,7 +1276,7 @@ static void __exit ieee80211_exit(void)
 	rcu_barrier();
 }
 
-
+// late_initcall(ieee80211_init);
 subsys_initcall(ieee80211_init);
 module_exit(ieee80211_exit);
 
