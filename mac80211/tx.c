@@ -1477,6 +1477,7 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 					tx.sta, txpending);
 #ifdef WIFI_MOBILITY
 	printk(KERN_INFO"[WIFI MOBILITY] tx.c : ieee80211_tx function.\n");
+	printk(KERN_INFO"[WIFI MOBILITY] tx.c : sk_buff protocol %u.\n", skb->protocol);
     if (result && g_rxtx_timer_allowed) {
         mod_timer(&g_rxtx_timer, jiffies+sysctl_wait_time);
     }
