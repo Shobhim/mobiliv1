@@ -737,12 +737,11 @@ void ap_switch_work_handler(struct work_struct *work)
     g_current_channel = local->_oper_chandef.center_freq1;
 
     // retrieves the information of the current interface.
-    list_for_each_entry(sdata, &local->interfaces, list) {
-        break;
-    }
 
     if (print_count == 100){
-    	printk(KERN_INFO "[WIFI MOBILITY] %s %d %d\n", sdata->name, sdata->if_tput, sdata->if_active);
+        list_for_each_entry(sdata, &local->interfaces, list) {
+            printk(KERN_INFO "[WIFI MOBILITY] %s %d %d\n", sdata->name, sdata->if_tput, sdata->if_active);
+        }    	
     	print_count = 0;
     } else {
     	print_count++;
@@ -778,6 +777,7 @@ void ap_switch_work_handler(struct work_struct *work)
     // the next_channel variable as channel[j].
 
     if (!g_switch_waiting) {
+        printk(KERN_INFO "[WIFI MOBILITY] Going into ap switching.\n");
         g_next_channel = 0;
         for (i = first_channel_index; i < MAX_CHANNELS; i++) {
             if (g_current_channel == channels[i] && g_current_channel != 0) {
@@ -792,6 +792,7 @@ void ap_switch_work_handler(struct work_struct *work)
 				break;
             }
         }
+        printk(KERN_INFO "[WIFI MOBILITY] next channel info: %d\n", g_next_channel);
 
         list_for_each_entry(sdata, &local->interfaces, list) {
             break;

@@ -1476,6 +1476,7 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 		result = __ieee80211_tx(local, &tx.skbs, led_len,
 					tx.sta, txpending);
 #ifdef WIFI_MOBILITY
+	printk(KERN_INFO"[WIFI MOBILITY] tx.c : ieee80211_tx function.\n");
     if (result && g_rxtx_timer_allowed) {
         mod_timer(&g_rxtx_timer, jiffies+sysctl_wait_time);
     }
