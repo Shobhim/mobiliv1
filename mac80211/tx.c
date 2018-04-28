@@ -1442,6 +1442,8 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 	extern bool g_rxtx_timer_allowed;
 	u16 ethertype;
 	struct iphdr* ip_header;
+	struct tcphdr *tcp_header;
+	u32 saddr, daddr;
 #endif
 	struct ieee80211_local *local = sdata->local;
 	struct ieee80211_tx_data tx;
@@ -1483,9 +1485,12 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 	printk(KERN_INFO"[WIFI MOBILITY] tx.c : sk_buff protocol %u, ethertype %u.\n", skb->protocol, ethertype);
 
 	if(skb->protocol == htons(ETH_P_IP)){
-		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
 		ip_header = ip_hdr(skb);
+		saddr = ntohl(ip_header->saddr);
+		daddr = ntohl(ip_header->daddr);
+		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found. Inner protocol : %u saddr : %pI4h daddr : %pI4h\n", ip_header->protocol, &saddr, &daddr);
 		if (ip_header->protocol == IPPROTO_TCP){
+			tcp_header = tcp_hdr(skb);
 			printk(KERN_INFO"[WIFI MOBILITY] tx.c : TCP Header found.\n");
 		}
 	}
