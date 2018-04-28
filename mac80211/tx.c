@@ -1437,9 +1437,11 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 			 enum ieee80211_band band)
 {
 #ifdef WIFI_MOBILITY
-        extern struct timer_list g_rxtx_timer;
+    extern struct timer_list g_rxtx_timer;
 	extern int sysctl_wait_time;
 	extern bool g_rxtx_timer_allowed;
+	u16 ethertype;
+	struct iphdr* ip_header;
 #endif
 	struct ieee80211_local *local = sdata->local;
 	struct ieee80211_tx_data tx;
@@ -1477,7 +1479,16 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 					tx.sta, txpending);
 #ifdef WIFI_MOBILITY
 	printk(KERN_INFO"[WIFI MOBILITY] tx.c : ieee80211_tx function.\n");
-	printk(KERN_INFO"[WIFI MOBILITY] tx.c : sk_buff protocol %u.\n", skb->protocol);
+	ethertype = (skb->data[12] << 8) | skb->data[13];
+	printk(KERN_INFO"[WIFI MOBILITY] tx.c : sk_buff protocol %u, ethertype %u.\n", skb->protocol, ethertype);
+
+	if(skb->protocol == htons(ETH_P_IP)){
+		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
+		ip_header = ip_hdr(skb);
+		if (ip_header->protocol == IPPROTO_TCP){
+			printk(KERN_INFO"[WIFI MOBILITY] tx.c : TCP Header found.\n");
+		}
+	}
     if (result && g_rxtx_timer_allowed) {
         mod_timer(&g_rxtx_timer, jiffies+sysctl_wait_time);
     }
