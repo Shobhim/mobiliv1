@@ -23,8 +23,8 @@
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/in.h>
-#include <linux/netfilter.h>
-#include <linux/netfilter_ipv4.h>
+// #include <linux/netfilter.h>
+// #include <linux/netfilter_ipv4.h>
 // #include <net/tcp.h>
 #endif
 #include <linux/time.h>
@@ -1508,6 +1508,7 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 
     	if (ip_header) {
     		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
+    		printk(KERN_INFO"[WIFI MOBILITY] tx.c : Protocol : %d\n", (int)ip_header->protocol);
       		if (ip_header->protocol == IPPROTO_TCP) {
 
        			tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
