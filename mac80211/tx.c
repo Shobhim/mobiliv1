@@ -1444,10 +1444,11 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 	extern int sysctl_wait_time;
 	extern bool g_rxtx_timer_allowed;
 	// u16 ethertype;
-	struct iphdr* ip_header;
-	struct tcphdr *tcp_header;
-	// u32 saddr, daddr;
-	struct sk_buff *sock_buff;
+	// struct iphdr* ip_header;
+	// struct tcphdr *tcp_header;
+	// u32 rtt;
+	// struct sk_buff *sock_buff;
+	// struct tcp_sock *tp;
 #endif
 	struct ieee80211_local *local = sdata->local;
 	struct ieee80211_tx_data tx;
@@ -1500,27 +1501,46 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
 	// 	}
 	// }
 
-	sock_buff = skb;
+	// sock_buff = skb;
 
-  	if(sock_buff) {
+ //  	if(sock_buff) {
 
-    	ip_header = (struct iphdr *)skb_network_header(sock_buff);
+ //    	ip_header = (struct iphdr *)skb_network_header(sock_buff);
 
-    	if (ip_header) {
-    		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
-    		printk(KERN_INFO"[WIFI MOBILITY] tx.c : Protocol : %d\n", (int)ip_header->protocol);
-      		if (ip_header->protocol == IPPROTO_TCP) {
+ //    	if (ip_header) {
+ //    		printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
+ //    		printk(KERN_INFO"[WIFI MOBILITY] tx.c : Protocol : %d\n", (int)ip_header->protocol);
+ //      		if (ip_header->protocol == IPPROTO_TCP) {
 
-       			tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
-        		printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
-               		ip_header->saddr & 0x000000FF,
-               		(ip_header->saddr & 0x0000FF00) >> 8,
-               		(ip_header->saddr & 0x00FF0000) >> 16,
-               		(ip_header->saddr & 0xFF000000) >> 24);
+ //       			tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
+ //        		printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
+ //               		ip_header->saddr & 0x000000FF,
+ //               		(ip_header->saddr & 0x0000FF00) >> 8,
+ //               		(ip_header->saddr & 0x00FF0000) >> 16,
+ //               		(ip_header->saddr & 0xFF000000) >> 24);
 
-     		 }
-		}
-	}
+ //        		printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
+ //               		ip_header->daddr & 0x000000FF,
+ //               		(ip_header->daddr & 0x0000FF00) >> 8,
+ //               		(ip_header->daddr & 0x00FF0000) >> 16,
+ //               		(ip_header->daddr & 0xFF000000) >> 24);
+
+ //        		// tp = tcp_sk(sock_buff->sk);
+ //        		// lock_sock(sock_buff->sk);
+ //        		// rtt = tp->srtt;
+ //        		// release_sock(sock_buff->sk);
+
+ //        		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d buffer length : %d\n", rtt, skb->len);
+
+ //     		}
+
+ //     		// tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
+
+ //     		// if (tcp_header){
+ //     		// 	printk(KERN_INFO"[WIFI MOBILITY] tx.c : TCP Header found.\n");
+ //     		// }
+	// 	}
+	// }
     if (result && g_rxtx_timer_allowed) {
         mod_timer(&g_rxtx_timer, jiffies+sysctl_wait_time);
     }
@@ -1567,6 +1587,11 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata, struct sk_buff *skb,
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
 	int headroom;
 	bool may_encrypt;
+#ifdef WIFI_MOBILITY
+	struct iphdr* ip_header;
+	struct tcphdr* tcp_header;
+	struct sk_buff* sock_buff;
+#endif
 
 	may_encrypt = !(info->flags & IEEE80211_TX_INTFL_DONT_ENCRYPT);
 
@@ -1583,6 +1608,35 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata, struct sk_buff *skb,
 
 	hdr = (struct ieee80211_hdr *) skb->data;
 	info->control.vif = &sdata->vif;
+
+#ifdef WIFI_MOBILITY
+	// printk(KERN_INFO"[WIFI MOBILITY] tx.c : Inside ieee80211_xmit() function.\n");
+	sock_buff = skb;
+
+	ip_header = (struct iphdr *)skb_network_header(sock_buff);
+
+	if (ip_header) {
+		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
+		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : Protocol : %d\n", (int)ip_header->protocol);
+
+		if (ip_header->protocol == IPPROTO_TCP) {
+
+   			tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
+   			printk(KERN_INFO"[WIFI MOBILITY] tx.c : TCP Header found.\n");
+    		printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
+           		ip_header->saddr & 0x000000FF,
+           		(ip_header->saddr & 0x0000FF00) >> 8,
+           		(ip_header->saddr & 0x00FF0000) >> 16,
+           		(ip_header->saddr & 0xFF000000) >> 24);
+
+    		printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
+           		ip_header->daddr & 0x000000FF,
+           		(ip_header->daddr & 0x0000FF00) >> 8,
+           		(ip_header->daddr & 0x00FF0000) >> 16,
+           		(ip_header->daddr & 0xFF000000) >> 24);
+ 		}
+	}
+#endif
 
 	if (ieee80211_vif_is_mesh(&sdata->vif)) {
 		if (ieee80211_is_data(hdr->frame_control) &&
