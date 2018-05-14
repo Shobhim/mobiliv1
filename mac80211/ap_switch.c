@@ -738,9 +738,10 @@ void ap_switch_work_handler(struct work_struct *work)
 
     // retrieves the information of the current interface.
 
-    if (print_count == 100){
+    if (print_count == 5){
         list_for_each_entry(sdata, &local->interfaces, list) {
-            printk(KERN_INFO "[WIFI MOBILITY] %s %d %d\n", sdata->name, sdata->if_tput, sdata->if_active);
+            printk(KERN_INFO "[WIFI MOBILITY] %s, rtt : %d, buf : %d\n", sdata->name, sdata->if_rtt, sdata->if_buf);
+            // printk(KERN_INFO "[WIFI MOBILITY] %s tput : %d\n", sdata->name, sdata->if_rtt / sdata->if_buf);
         }    	
     	print_count = 0;
     } else {

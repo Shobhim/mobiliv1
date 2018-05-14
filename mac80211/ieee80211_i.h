@@ -730,7 +730,9 @@ struct ieee80211_sub_if_data {
         int start, end;
         int loss_rate;
         int max_ecn_mark_rate;
-        u32 if_tput;
+        int if_rtt;
+        int if_buf;
+        int if_tput;
         int probe_count;
         int if_active;
 #endif
