@@ -1443,12 +1443,6 @@ static bool ieee80211_tx(struct ieee80211_sub_if_data *sdata,
     extern struct timer_list g_rxtx_timer;
 	extern int sysctl_wait_time;
 	extern bool g_rxtx_timer_allowed;
-	// u16 ethertype;
-	// struct iphdr* ip_header;
-	// struct tcphdr *tcp_header;
-	// u32 rtt;
-	// struct sk_buff *sock_buff;
-	// struct tcp_sock *tp;
 #endif
 	struct ieee80211_local *local = sdata->local;
 	struct ieee80211_tx_data tx;
@@ -1557,45 +1551,27 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata, struct sk_buff *skb,
 	info->control.vif = &sdata->vif;
 
 #ifdef WIFI_MOBILITY
-	// printk(KERN_INFO"[WIFI MOBILITY] tx.c : Inside ieee80211_xmit() function.\n");
 	sock_buff = skb;
 
 	ip_header = (struct iphdr *)skb_network_header(sock_buff);
 
 	if (ip_header) {
-		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : IP Header found.\n");
-		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : Protocol : %d\n", (int)ip_header->protocol);
 
 		if (ip_header->protocol == IPPROTO_TCP) {
 
    			tcp_header = (struct tcphdr *)(skb_transport_header(sock_buff)+sizeof(struct iphdr));
-   			// printk(KERN_INFO"[WIFI MOBILITY] tx.c : TCP Header found.\n");
-    		// printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
-      //      		ip_header->saddr & 0x000000FF,
-      //      		(ip_header->saddr & 0x0000FF00) >> 8,
-      //      		(ip_header->saddr & 0x00FF0000) >> 16,
-      //      		(ip_header->saddr & 0xFF000000) >> 24);
-
-    		// printk(KERN_INFO "[WIFI MOBILITY] DEBUG: From IP address: %d.%d.%d.%d\n",
-      //      		ip_header->daddr & 0x000000FF,
-      //      		(ip_header->daddr & 0x0000FF00) >> 8,
-      //      		(ip_header->daddr & 0x00FF0000) >> 16,
-      //      		(ip_header->daddr & 0xFF000000) >> 24);
-
     		tp = tcp_sk(sock_buff->sk);
+
     		if (tp) {
     			rtt = (int)tp->srtt;
     			buf = skb->len;
-    			sdata->if_rtt = (int)rtt;
-    			sdata->if_buf = buf;
-    			// printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d buf : %d\n", sdata->if_rtt, sdata->if_buf);
+    			if (rtt > 0 && buf > 0) {
+    				printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d buf : %d\n", rtt, buf);
+    				sdata->if_tput = buf / rtt;
+    				printk(KERN_INFO"[WIFI MOBILITY] tx.c : tput %d\n", sdata->if_tput);
+    			}
     		}
-    		// rtt = tp->srtt;
-
-    		// printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d\n", (int)rtt);
  		}
-
-
 	}
 #endif
 

@@ -736,20 +736,11 @@ void ap_switch_work_handler(struct work_struct *work)
     num_vifs = vif_index;
     g_current_channel = local->_oper_chandef.center_freq1;
 
-    // retrieves the information of the current interface.
-
-    if (print_count == 5){
-        list_for_each_entry(sdata, &local->interfaces, list) {
-            printk(KERN_INFO "[WIFI MOBILITY] %s, rtt : %d, buf : %d\n", sdata->name, sdata->if_rtt, sdata->if_buf);
-            // printk(KERN_INFO "[WIFI MOBILITY] %s tput : %d\n", sdata->name, sdata->if_rtt / sdata->if_buf);
-        }    	
-    	print_count = 0;
-    } else {
-    	print_count++;
+    list_for_each_entry(sdata, &local->interfaces, list) {
+    	break;
     }
-    // printk(KERN_INFO "[WIFI MOBILITY] %s %lu %d\n", sdata->name, (unsigned long)sdata->if_tput, sdata->if_active);
-    // printk(KERN_INFO "[WIFI MOBILITY] %d %d\n",vif_index, channels[vif_index]);
-
+    if (sdata->if_tput > 0)
+    	printk(KERN_INFO "[WIFI MOBILITY] %s %d\n", sdata->name, sdata->if_tput);
 
     if (sdata->if_tput > 0 && sdata->if_tput < tput_thresh * avg_tput / 100) {
     	sdata->if_active = 0;
