@@ -1532,6 +1532,7 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata, struct sk_buff *skb,
 	struct tcp_sock* tp;
 	u32 rtt;
 	int buf;
+	int alpha = 10;
 #endif
 
 	may_encrypt = !(info->flags & IEEE80211_TX_INTFL_DONT_ENCRYPT);
@@ -1566,9 +1567,9 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata, struct sk_buff *skb,
     			rtt = (int)tp->srtt;
     			buf = skb->len;
     			if (rtt > 0 && buf > 0) {
-    				printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d buf : %d\n", rtt, buf);
-    				sdata->if_tput = buf / rtt;
-    				printk(KERN_INFO"[WIFI MOBILITY] tx.c : tput %d\n", sdata->if_tput);
+    				// printk(KERN_INFO"[WIFI MOBILITY] tx.c : rtt : %d buf : %d\n", rtt, buf);
+    				sdata->if_tput = (alpha * buf / rtt * 100) + ((100 - alpha) * sdata->if_tput / 100);
+    				// printk(KERN_INFO"[WIFI MOBILITY] tx.c : ewma_tput %d instant_tput %d\n", sdata->if_tput, buf/rtt);
     			}
     		}
  		}

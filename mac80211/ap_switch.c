@@ -736,19 +736,27 @@ void ap_switch_work_handler(struct work_struct *work)
     num_vifs = vif_index;
     g_current_channel = local->_oper_chandef.center_freq1;
 
-    list_for_each_entry(sdata, &local->interfaces, list) {
-    	break;
-    }
-    if (sdata->if_tput > 0)
-    	printk(KERN_INFO "[WIFI MOBILITY] %s %d\n", sdata->name, sdata->if_tput);
+    // list_for_each_entry(sdata, &local->interfaces, list) {
+    // 	break;
+    // }
 
-    if (sdata->if_tput > 0 && sdata->if_tput < tput_thresh * avg_tput / 100) {
-    	sdata->if_active = 0;
-    	if(g_probe_timer_enabled == 0)
-    		mod_timer(&g_probe_timer, jiffies + sysctl_time_slot * 2 * MAX_VIFS);
-    }
+    // printk(KERN_INFO "[WIFI MOBILITY] ap_switch.c : fci %d\n", first_channel_index);
+    // if (first_channel_index >= 0)
+    // 	printk(KERN_INFO "[WIFI MOBILITY] ap_switch.c : fci : %s\n", vif_sdata[first_channel_index]->name);
+
+    // if (sdata->if_tput > 0)
+    // 	printk(KERN_INFO "[WIFI MOBILITY] ap_switch.c : %s %d\n", sdata->name, sdata->if_tput);
+
+    // if (sdata->if_tput > 0 && sdata->if_tput < tput_thresh * avg_tput / 100) {
+    // 	sdata->if_active = 0;
+    // 	if(g_probe_timer_enabled == 0)
+    // 		mod_timer(&g_probe_timer, jiffies + sysctl_time_slot * 2 * MAX_VIFS);
+    // }
 
     avg_tput = sysctl_alpha * sdata->if_tput / 100 + (100 - sysctl_alpha) * avg_tput / 100;
+
+    // if (avg_tput > 0)
+    // 	printk(KERN_INFO "[WIFI MOBILITY] ap_switch.c : avg_tput : %d\n", avg_tput);
 
     if (num_channels == 1 || num_channels == 0) {
 		g_ap_switching = false;
@@ -770,6 +778,8 @@ void ap_switch_work_handler(struct work_struct *work)
 
     if (!g_switch_waiting) {
         printk(KERN_INFO "[WIFI MOBILITY] Going into ap switching.\n");
+        printk(KERN_INFO "[WIFI MOBILITY] current channel info: %d\n", channels[g_current_channel_index]);
+        printk(KERN_INFO "[WIFI MOBILITY] ap_switch.c : %s %d\n", vif_sdata[g_current_channel_index]->name, vif_sdata[g_current_channel_index]->if_tput);
         g_next_channel = 0;
         for (i = first_channel_index; i < MAX_CHANNELS; i++) {
             if (g_current_channel == channels[i] && g_current_channel != 0) {
